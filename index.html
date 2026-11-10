@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Isotope planner · Fuelling · Atlas Atomics</title>
+<meta name="theme-color" content="#050506">
+<link rel="icon" type="image/png" href="assets/atlas-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="poster" aria-hidden="true">
+  <div class="layer gradient-base"></div>
+  <div class="ombre-layer"><div class="ombre-halo"></div><div class="ombre-blob"></div></div>
+  <div class="layer gradient-sheen"></div>
+  <div class="layer gradient-shade"></div>
+  <div class="layer gradient-dark"></div>
+  <div class="layer grain"></div>
+  <img class="circle circle-outer" src="assets/circle-outer.svg" alt="">
+  <img class="circle circle-mid" src="assets/circle-mid.svg" alt="">
+  <img class="circle circle-inner" src="assets/circle-inner.svg" alt="">
+</div>
+
+<div class="app">
+  <aside class="rail">
+    <div class="brand">
+      <img class="brand-mark" src="assets/atlas-mark.png" alt="">
+      <img class="brand-word" src="assets/wordmark-plain.svg" alt="Atlas Atomics">
+    </div>
+    <div class="unit caption">Unit 1 · 1,050 MWth</div>
+    <nav class="nav">
+      <a class="caption">Overview</a>
+      <a class="caption">Core</a>
+      <a class="caption active">Fuelling</a>
+      <div class="subnav">
+        <a class="caption">Channel queue</a>
+        <a class="caption">Discharge log</a>
+        <a class="caption current">Isotope planner <span class="new">New</span></a>
+      </div>
+      <a class="caption">Isotopes</a>
+      <a class="caption">Chemistry</a>
+      <a class="caption">Maintenance</a>
+      <a class="caption">Reports</a>
+    </nav>
+    <div class="rail-foot caption">Unofficial concept demo by Mohith Gajjela. Not affiliated with Atlas Atomics. Synthetic data.</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumbs caption"><span>Fuelling</span><span class="sep">/</span><span class="here">Isotope planner</span></div>
+      <div class="chips">
+        <div class="chip caption"><span>k-eff</span><b id="chip-k">-</b></div>
+        <div class="chip caption"><span>Excess</span><b id="chip-rho">-</b></div>
+        <div class="chip caption"><span>Exit burnup</span><b id="chip-bu">-</b></div>
+        <div class="chip caption"><span>Refuels / FPD</span><b id="chip-rf">-</b></div>
+        <div class="chip caption live"><i></i><span id="chip-status">Solving</span></div>
+      </div>
+    </header>
+
+    <section class="head">
+      <div>
+        <h1>Isotope-aware fuelling plan</h1>
+        <p class="lede">Assigns each isotope thimble a Lu-177 capsule, a Co-59 stringer or nothing, sets each capsule's irradiation time, and checks the plan against daily on-power refuelling. Every candidate is scored with a two-group diffusion solve of the whole core, so absorber worth, flux shadowing between targets and power peaking are priced in.</p>
+      </div>
+      <form class="controls" id="controls">
+        <label class="ctl"><span class="caption">Co-59 stringers</span><input type="range" id="in-co" min="0" max="16" step="1" value="10"><output id="out-co">10</output></label>
+        <label class="ctl"><span class="caption">Lu capsules / cycle</span><input type="range" id="in-lu" min="0" max="12" step="1" value="6"><output id="out-lu">6</output></label>
+        <label class="ctl"><span class="caption">Lu-177 $/Ci</span><input type="number" id="in-plu" value="250" min="0" step="10"></label>
+        <label class="ctl"><span class="caption">Co-60 $/Ci</span><input type="number" id="in-pco" value="3" min="0" step="0.5"></label>
+        <label class="ctl"><span class="caption">Fuel $/kgU</span><input type="number" id="in-pf" value="250" min="0" step="10"></label>
+        <button type="submit" class="btn caption" id="run">Re-plan</button>
+      </form>
+    </section>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="grid">
+      <div class="panel map-panel">
+        <div class="panel-head">
+          <div class="caption title">Core map · channel power</div>
+          <div class="seg" id="view-seg">
+            <button class="caption on" data-v="plan">Planner</button>
+            <button class="caption" data-v="rule">Rule of thumb</button>
+          </div>
+        </div>
+        <div class="map-wrap"><svg id="map" viewBox="0 0 560 560" role="img" aria-label="Core lattice map"></svg><div class="tip" id="tip"></div></div>
+        <div class="legend caption" id="legend"></div>
+      </div>
+      <div class="panel table-panel">
+        <div class="panel-head"><div class="caption title">Thimble assignments</div><div class="caption muted" id="thimble-note"></div></div>
+        <table class="tbl" id="thimbles"></table>
+      </div>
+    </section>
+
+    <section class="grid two">
+      <div class="panel">
+        <div class="panel-head"><div class="caption title">42-FPD verification</div><div class="caption muted" id="sim-progress"></div></div>
+        <table class="tbl" id="verify"></table>
+        <div class="chart" id="peak-chart"></div>
+        <div class="legend caption" id="peak-legend"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="caption title">Cobalt trade-off</div><div class="caption muted" id="pareto-note"></div></div>
+        <div class="chart tall" id="pareto"></div>
+        <p class="note" id="pareto-text"></p>
+      </div>
+    </section>
+
+    <section class="panel method">
+      <div class="panel-head"><div class="caption title">Method and assumptions</div></div>
+      <div class="cols">
+        <p><b>Core model.</b> 208 pressure-tube channels on a 28.575 cm lattice with a 66 cm D2O reflector, two-group finite-difference diffusion (one node per lattice cell, axial leakage by buckling), 12 bundles per channel with 8-bundle-shift on-power refuelling. Lattice constants follow a representative natural-uranium k-inf(irradiation) curve; the synthetic core is burned in for 640 days to equilibrium (exit burnup <span data-k="bu"></span> MWd/kgU, <span data-k="rf"></span> refuels/FPD).</p>
+        <p><b>Planner.</b> Greedy construction, simulated annealing and swap/flip local search over thimble contents, each candidate scored by a full eigenvalue solve: Lu-177 via 176Yb(n,γ) with 177Lu burnout, Co-60 via 59Co(n,γ); reactivity cost converted to discharge-burnup loss through a numerically derived dρ/dω. A loading may not raise peak channel power by more than 0.05 MW over the target-free core.</p>
+        <p><b>Verification.</b> Each strategy runs <span data-k="warm"></span> unscored + 42 scored full-power days of daily channel selection by pre-simulation (each candidate refuel is solved before it is chosen) against the reference power map. Prices and capsule cost are illustrative inputs, not market data. This is a planning sketch, not a licensed core-physics code.</p>
+      </div>
+    </section>
+    <footer class="foot caption">Unofficial concept demo by Mohith Gajjela · Not affiliated with Atlas Atomics · Synthetic data · <a href="https://github.com/Mohith26/atlas-atomics-isotope-fuelling-planner">Source</a></footer>
+  </main>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
