@@ -21,7 +21,20 @@ This page plans that jointly for a synthetic 208-channel, ~1,050 MWth pressure-t
 Everything on the page is computed in the browser from `data/core_state.json` by this code; nothing is hard-coded.
 
 ## Results on the default synthetic case (prices are illustrative inputs)
-The rule of thumb (cobalt in the hottest thimbles, Lu-177 in the next, fixed 7-day cycles) is compared with the planner. On the default inputs the planner moves cobalt mostly to the outer ring, puts Lu-177 in the hottest inner thimbles with 6-day cycles, uses ~5 mk of reactivity instead of ~12.7 mk, and nets ~$1.4M/yr more on the static model; the 42-FPD simulation confirms the direction (more Lu-177, fewer refuels, peak channel power inside the fuel-only envelope). Exact figures are on the page and change with the inputs.
+The rule of thumb (cobalt in the hottest thimbles, Lu-177 in the next, fixed 7-day cycles) is compared with the planner. Default inputs: up to 10 Co-59 stringers, 6 Lu-177 capsules per cycle, Lu-177 $250/Ci, Co-60 $3/Ci, fuel $250/kgU, $4,000 per processed capsule.
+
+| | Rule of thumb | Planner |
+|---|---|---|
+| Static model: net isotope value / yr | $15.45M | $16.83M |
+| Lu-177 at EOI / yr | 45.8 kCi | 60.1 kCi (6-day cycles) |
+| Co-60 accrued / yr | 2.44 MCi | 1.22 MCi (6 stringers, 5 in the outer ring) |
+| Reactivity cost / fuel penalty | 12.7 mk / $2.43M | 5.1 mk / $0.86M |
+| 42-FPD simulation: Lu-177 delivered | 5,106 Ci | 7,215 Ci |
+| 42-FPD simulation: refuels (fuel-only: 48) | 57 | 52 |
+| 42-FPD simulation: peak channel power (fuel-only: 7.31 MW) | 7.30 MW | 7.36 MW |
+| 42-FPD simulation: realised net / yr | $14.80M | $16.09M |
+
+The planner gives up half the cobalt to put Lu-177 in the hottest inner thimbles and move cobalt to the outer ring, where it costs less reactivity and shadows no capsules. Peak channel power in the simulation is 0.7% above fuel-only operation; the rule of thumb is at the fuel-only level. These are model outputs on a synthetic core with illustrative prices, and they move with the inputs on the page.
 
 ## Tests
 `node --test tests/test.mjs` (13 tests): k-inf/xs consistency; bare-square eigenvalue converges to the analytic two-group value under mesh refinement; symmetric power map and power normalisation; refuelling shift for both directions; Bateman vs RK4 and saturation limit; Lu-177 cycle optimum vs brute force; cobalt worth is sub-additive (shadowing); fuel sensitivity sign; optimiser equals exhaustive search on a 6-thimble instance; full plan beats the rule of thumb; warm-started cobalt sweep is non-decreasing; simulation determinism and zone-control band; equilibrium-data sanity.
